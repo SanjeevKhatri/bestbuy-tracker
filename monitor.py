@@ -35,7 +35,7 @@ def check_stock_button():
         })
         print("🔄 Checking Best Buy...")
         try:
-        page.goto(URL, timeout=120000, wait_until="domcontentloaded")
+            page.goto(URL, timeout=120000, wait_until="domcontentloaded")
             button = page.locator("button.add-to-cart-button").first
             text = button.text_content().strip().lower()
             print(f"🟡 Button Text: '{text}'")
