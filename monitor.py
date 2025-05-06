@@ -10,6 +10,7 @@ EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 TO_EMAIL = os.getenv("TO_EMAIL")
 
+
 def send_email_alert():
     msg = MIMEText(f"The Nintendo Switch might be available!\n\nCheck here: {URL}")
     msg["Subject"] = "🎮 Best Buy Alert: Switch In Stock!"
@@ -23,6 +24,7 @@ def send_email_alert():
             print("📬 Email sent!")
     except Exception as e:
         print("❌ Failed to send email:", e)
+
 
 def check_stock_button():
     with sync_playwright() as p:
@@ -51,7 +53,8 @@ def check_stock_button():
 
         browser.close()
 
+
 # 🔁 Loop forever, every 60 seconds
 while True:
-check_stock_button()
+    check_stock_button()
     time.sleep(60)
