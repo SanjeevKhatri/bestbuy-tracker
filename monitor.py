@@ -1,3 +1,4 @@
+import time
 from playwright.sync_api import sync_playwright
 import smtplib
 from email.mime.text import MIMEText
@@ -32,14 +33,12 @@ def check_stock_button():
         page.set_extra_http_headers({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
         })
-
-        print("🔄 Visiting Best Buy...")
-        page.goto(URL, timeout=120000, wait_until="domcontentloaded")
-
+        print("🔄 Checking Best Buy...")
         try:
+        page.goto(URL, timeout=120000, wait_until="domcontentloaded")
             button = page.locator("button.add-to-cart-button").first
-            text = button.text_content().strip()
-            print(f"🔘 Button Text: '{text}'")
+            text = button.text_content().strip().lower()
+            print(f"🟡 Button Text: '{text}'")
 
             if text.lower() in ["add to cart", "pre-order"]:
                 print("✅ Product might be available!")
@@ -52,4 +51,7 @@ def check_stock_button():
 
         browser.close()
 
+# 🔁 Loop forever, every 60 seconds
+while True:
 check_stock_button()
+    time.sleep(60)
