@@ -3,12 +3,14 @@ from playwright.sync_api import sync_playwright
 import smtplib
 from email.mime.text import MIMEText
 import os
+import sys
 
-# --- Config from environment variables ---
-URL = "https://www.bestbuy.com/site/nintendo-switch-2-mario-kart-world-bundle-multi/6614325.p?skuId=6614325"
-EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-TO_EMAIL = os.getenv("TO_EMAIL")
+# --- Config from environment variables or hardcoded fallback (for local dev) ---
+URL = os.getenv("SWITCH_URL",
+                "https://www.bestbuy.com/site/nintendo-switch-2-mario-kart-world-bundle-multi/6614325.p?skuId=6614325")
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS", "your_email@gmail.com")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD", "your_app_password")
+TO_EMAIL = os.getenv("TO_EMAIL", "recipient_email@gmail.com")
 
 
 def send_email_alert():
@@ -28,33 +30,36 @@ def send_email_alert():
 
 def check_stock_button():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-
-        # Set user-agent to avoid bot blocking
-        page.set_extra_http_headers({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-        })
-        print("🔄 Checking Best Buy...")
         try:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+
+            page.set_extra_http_headers({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            })
+
+            print("🔄 Checking Best Buy...")
             page.goto(URL, timeout=120000, wait_until="domcontentloaded")
+
             button = page.locator("button.add-to-cart-button").first
-            text = button.text_content().strip().lower()
+            text = button.text_content().strip().lower() if button else ""
+
             print(f"🟡 Button Text: '{text}'")
 
-            if text.lower() in ["add to cart", "pre-order"]:
+            if text in ["add to cart", "pre-order"]:
                 print("✅ Product might be available!")
                 send_email_alert()
             else:
-                print("❌ Still unavailable (Button shows '{}').".format(text))
+                print(f"❌ Still unavailable (Button shows '{text}').")
 
         except Exception as e:
-            print("⚠️ Could not read button text:", e)
+            print("⚠️ Could not complete check:", e)
 
-        browser.close()
+        finally:
+            browser.close()
 
 
-# 🔁 Loop forever, every 60 seconds
-while True:
-    check_stock_button()
-    time.sleep(60)
+if __name__ == "__main__":
+    while True:
+        check_stock_button()
+        time.sleep(60)
