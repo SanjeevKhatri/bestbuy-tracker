@@ -12,14 +12,14 @@ def run_checker():
         check_stock_button()
         time.sleep(60)  # Run every 1 minute
 
-# Start the checker thread
+print("App is:", type(app))  # Should show <class 'flask.app.Flask'>
+
 @app.before_first_request
 def start_background_thread():
     thread = Thread(target=run_checker, daemon=True)
     thread.start()
     print("🚀 Background thread started.")
 
-# Web route
 @app.route("/")
 def index():
     return "✅ Monitor is running in the background."
