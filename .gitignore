@@ -25,3 +25,4 @@ coverage/
 
 /backend/dialogflow_credentials.json
 /venv/
+/node_modules/
